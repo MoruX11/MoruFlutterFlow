@@ -1,0 +1,78 @@
+{
+  "project_info": {
+    "project_number": "507991633027",
+    "project_id": "mooru-e7uk4u",
+    "storage_bucket": "mooru-e7uk4u.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:507991633027:android:9a376a1f905b55b1187fb6",
+        "android_client_info": {
+          "package_name": "com.mycompany.mooru"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "507991633027-24srocqlgg3bjmqlon80krd63ok43jvh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.mooru",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "507991633027-5f5dlj55qdpmhndp4v7bkvtlq31dcehb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.mooru",
+            "certificate_hash": "5dd18a8ba4828e0853ef4645b0007b1846f837e4"
+          }
+        },
+        {
+          "client_id": "507991633027-6g9n02r63r09ees0dll4oce08vi69hke.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.mooru",
+            "certificate_hash": "0248741e9a01eba925298c2fddf7228f095704ce"
+          }
+        },
+        {
+          "client_id": "507991633027-lmhj14vouce1dbil4mdo84o2k9ek38tv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.mooru",
+            "certificate_hash": "7f6e5173da9739c7b8e96bfd675b48addff8edb0"
+          }
+        },
+        {
+          "client_id": "507991633027-26qqiipknrr77vgvf2mfnr2uodgskat1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBv2TcXeSafVFWgQ0J1x5R5jR65N4Nfx0Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "507991633027-26qqiipknrr77vgvf2mfnr2uodgskat1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "507991633027-hsgi6jaalrn7vjgta4uifevekersefp5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.mooru"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

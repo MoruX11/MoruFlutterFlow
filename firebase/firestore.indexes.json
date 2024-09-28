@@ -1,0 +1,18 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "store",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "hallway",
+          "arrayConfig": "CONTAINS"
+        }
+      ]
+    }
+  ]
+}
