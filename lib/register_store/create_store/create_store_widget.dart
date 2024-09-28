@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/backend/firebase_storage/storage.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
+import '/flutter_flow/flutter_flow_expanded_image_view.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -9,10 +10,12 @@ import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/info/nit/nit_widget.dart';
 import 'dart:async';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'create_store_model.dart';
 export 'create_store_model.dart';
 
@@ -81,6 +84,8 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -116,8 +121,20 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                           onTap: () async {
                             logFirebaseEvent(
                                 'CREATE_STORE_PAGE_Text_rlsb0sbk_ON_TAP');
-                            logFirebaseEvent('Text_navigate_back');
-                            context.safePop();
+                            if (FFAppState().createLogo != '') {
+                              logFirebaseEvent('Text_delete_data');
+                              await FirebaseStorage.instance
+                                  .refFromURL(FFAppState().createLogo)
+                                  .delete();
+                              logFirebaseEvent('Text_update_app_state');
+                              FFAppState().createLogo = '';
+                              safeSetState(() {});
+                              logFirebaseEvent('Text_navigate_back');
+                              context.safePop();
+                            } else {
+                              logFirebaseEvent('Text_navigate_back');
+                              context.safePop();
+                            }
                           },
                           child: Text(
                             'Atrás',
@@ -946,20 +963,45 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        Align(
-                                          alignment:
-                                              const AlignmentDirectional(0.0, 0.0),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(16.0),
-                                            child: Image.memory(
-                                              _model.uploadedLocalFile1.bytes ??
-                                                  Uint8List.fromList([]),
-                                              width: 350.0,
-                                              height: 300.0,
-                                              fit: BoxFit.cover,
-                                              cacheWidth: 1024,
-                                              cacheHeight: 1024,
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            logFirebaseEvent(
+                                                'CREATE_STORE_PAGE_Image_cv8a0vgu_ON_TAP');
+                                            logFirebaseEvent(
+                                                'Image_expand_image');
+                                            await Navigator.push(
+                                              context,
+                                              PageTransition(
+                                                type: PageTransitionType.fade,
+                                                child:
+                                                    FlutterFlowExpandedImageView(
+                                                  image: Image.network(
+                                                    FFAppState().createLogo,
+                                                    fit: BoxFit.contain,
+                                                  ),
+                                                  allowRotation: false,
+                                                  tag: FFAppState().createLogo,
+                                                  useHeroAnimation: true,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Hero(
+                                            tag: FFAppState().createLogo,
+                                            transitionOnUserGestures: true,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              child: Image.network(
+                                                FFAppState().createLogo,
+                                                width: 200.0,
+                                                height: 200.0,
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -977,13 +1019,9 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                                                   logFirebaseEvent(
                                                       'CREATE_STORE_ESCOGER_LOGO_BTN_ON_TAP');
                                                   logFirebaseEvent(
-                                                      'Button_store_media_for_upload');
+                                                      'Button_upload_media_to_firebase');
                                                   final selectedMedia =
                                                       await selectMedia(
-                                                    maxWidth: 1024.00,
-                                                    maxHeight: 1024.00,
-                                                    imageQuality: 100,
-                                                    includeDimensions: true,
                                                     mediaSource: MediaSource
                                                         .photoGallery,
                                                     multiImage: false,
@@ -993,18 +1031,15 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                                                           validateFileFormat(
                                                               m.storagePath,
                                                               context))) {
-                                                    safeSetState(() => _model
-                                                            .isDataUploading1 =
-                                                        true);
+                                                    safeSetState(() =>
+                                                        _model.isDataUploading =
+                                                            true);
                                                     var selectedUploadedFiles =
                                                         <FFUploadedFile>[];
 
+                                                    var downloadUrls =
+                                                        <String>[];
                                                     try {
-                                                      showUploadMessage(
-                                                        context,
-                                                        'Uploading file...',
-                                                        showLoading: true,
-                                                      );
                                                       selectedUploadedFiles =
                                                           selectedMedia
                                                               .map((m) =>
@@ -1026,29 +1061,69 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                                                                         .blurHash,
                                                                   ))
                                                               .toList();
+
+                                                      downloadUrls =
+                                                          (await Future.wait(
+                                                        selectedMedia.map(
+                                                          (m) async =>
+                                                              await uploadData(
+                                                                  m.storagePath,
+                                                                  m.bytes),
+                                                        ),
+                                                      ))
+                                                              .where((u) =>
+                                                                  u != null)
+                                                              .map((u) => u!)
+                                                              .toList();
                                                     } finally {
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .hideCurrentSnackBar();
-                                                      _model.isDataUploading1 =
+                                                      _model.isDataUploading =
                                                           false;
                                                     }
                                                     if (selectedUploadedFiles
-                                                            .length ==
-                                                        selectedMedia.length) {
+                                                                .length ==
+                                                            selectedMedia
+                                                                .length &&
+                                                        downloadUrls.length ==
+                                                            selectedMedia
+                                                                .length) {
                                                       safeSetState(() {
-                                                        _model.uploadedLocalFile1 =
+                                                        _model.uploadedLocalFile =
                                                             selectedUploadedFiles
                                                                 .first;
+                                                        _model.uploadedFileUrl =
+                                                            downloadUrls.first;
                                                       });
-                                                      showUploadMessage(
-                                                          context, 'Success!');
                                                     } else {
                                                       safeSetState(() {});
-                                                      showUploadMessage(context,
-                                                          'Failed to upload data');
                                                       return;
                                                     }
+                                                  }
+
+                                                  if (FFAppState().createLogo !=
+                                                          '') {
+                                                    logFirebaseEvent(
+                                                        'Button_delete_data');
+                                                    await FirebaseStorage
+                                                        .instance
+                                                        .refFromURL(FFAppState()
+                                                            .createLogo)
+                                                        .delete();
+                                                    logFirebaseEvent(
+                                                        'Button_update_app_state');
+                                                    FFAppState().createLogo =
+                                                        '';
+                                                    safeSetState(() {});
+                                                    logFirebaseEvent(
+                                                        'Button_update_app_state');
+                                                    FFAppState().createLogo =
+                                                        _model.uploadedFileUrl;
+                                                    safeSetState(() {});
+                                                  } else {
+                                                    logFirebaseEvent(
+                                                        'Button_update_app_state');
+                                                    FFAppState().createLogo =
+                                                        _model.uploadedFileUrl;
+                                                    safeSetState(() {});
                                                   }
                                                 },
                                                 text: 'Escoger logo',
@@ -1065,154 +1140,6 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                                                       const EdgeInsetsDirectional
                                                           .fromSTEB(0.0, 0.0,
                                                               0.0, 0.0),
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryBackground,
-                                                  textStyle: FlutterFlowTheme
-                                                          .of(context)
-                                                      .titleSmall
-                                                      .override(
-                                                        fontFamily:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .titleSmallFamily,
-                                                        color:
-                                                            const Color(0xFF676464),
-                                                        letterSpacing: 0.0,
-                                                        useGoogleFonts: GoogleFonts
-                                                                .asMap()
-                                                            .containsKey(
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmallFamily),
-                                                      ),
-                                                  elevation: 3.0,
-                                                  borderSide: BorderSide(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryText,
-                                                    width: 1.0,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  hoverColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .primary,
-                                                  hoverBorderSide: BorderSide(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryBackground,
-                                                    width: 1.0,
-                                                  ),
-                                                  hoverTextColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .secondaryBackground,
-                                                ),
-                                              ),
-                                              FFButtonWidget(
-                                                onPressed: () async {
-                                                  logFirebaseEvent(
-                                                      'CREATE_STORE_PAGE_SUBIR_LOGO_BTN_ON_TAP');
-                                                  logFirebaseEvent(
-                                                      'Button_upload_media_to_firebase');
-                                                  {
-                                                    safeSetState(() => _model
-                                                            .isDataUploading2 =
-                                                        true);
-                                                    var selectedUploadedFiles =
-                                                        <FFUploadedFile>[];
-                                                    var selectedMedia =
-                                                        <SelectedFile>[];
-                                                    var downloadUrls =
-                                                        <String>[];
-                                                    try {
-                                                      showUploadMessage(
-                                                        context,
-                                                        'Uploading file...',
-                                                        showLoading: true,
-                                                      );
-                                                      selectedUploadedFiles = _model
-                                                              .uploadedLocalFile1
-                                                              .bytes!
-                                                              .isNotEmpty
-                                                          ? [
-                                                              _model
-                                                                  .uploadedLocalFile1
-                                                            ]
-                                                          : <FFUploadedFile>[];
-                                                      selectedMedia =
-                                                          selectedFilesFromUploadedFiles(
-                                                        selectedUploadedFiles,
-                                                      );
-                                                      downloadUrls =
-                                                          (await Future.wait(
-                                                        selectedMedia.map(
-                                                          (m) async =>
-                                                              await uploadData(
-                                                                  m.storagePath,
-                                                                  m.bytes),
-                                                        ),
-                                                      ))
-                                                              .where((u) =>
-                                                                  u != null)
-                                                              .map((u) => u!)
-                                                              .toList();
-                                                    } finally {
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .hideCurrentSnackBar();
-                                                      _model.isDataUploading2 =
-                                                          false;
-                                                    }
-                                                    if (selectedUploadedFiles
-                                                                .length ==
-                                                            selectedMedia
-                                                                .length &&
-                                                        downloadUrls.length ==
-                                                            selectedMedia
-                                                                .length) {
-                                                      safeSetState(() {
-                                                        _model.uploadedLocalFile2 =
-                                                            selectedUploadedFiles
-                                                                .first;
-                                                        _model.uploadedFileUrl2 =
-                                                            downloadUrls.first;
-                                                      });
-                                                      showUploadMessage(
-                                                          context, 'Success!');
-                                                    } else {
-                                                      safeSetState(() {});
-                                                      showUploadMessage(context,
-                                                          'Failed to upload data');
-                                                      return;
-                                                    }
-                                                  }
-
-                                                  logFirebaseEvent(
-                                                      'Button_backend_call');
-
-                                                  await currentUserReference!
-                                                      .update(
-                                                          createPersonsRecordData(
-                                                    photoUrl:
-                                                        _model.uploadedFileUrl2,
-                                                  ));
-                                                },
-                                                text: 'Subir logo',
-                                                icon: const Icon(
-                                                  Icons.check_outlined,
-                                                  size: 15.0,
-                                                ),
-                                                options: FFButtonOptions(
-                                                  height: 40.0,
-                                                  padding: const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          24.0, 0.0, 24.0, 0.0),
-                                                  iconPadding:
-                                                      const EdgeInsets.all(0.0),
                                                   color: FlutterFlowTheme.of(
                                                           context)
                                                       .secondaryBackground,
@@ -1357,40 +1284,10 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                                       );
                                       return;
                                     }
-                                    if (_model.uploadedFileUrl2.isEmpty) {
-                                      ScaffoldMessenger.of(context)
-                                          .clearSnackBars();
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Sube el logo para que los clientes te identifiquen. ',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMediumFamily,
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .primaryText,
-                                                  letterSpacing: 0.0,
-                                                  useGoogleFonts: GoogleFonts
-                                                          .asMap()
-                                                      .containsKey(
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .bodyMediumFamily),
-                                                ),
-                                          ),
-                                          duration:
-                                              const Duration(milliseconds: 4000),
-                                          backgroundColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .tertiary,
-                                        ),
-                                      );
+                                    if (_model.uploadedFileUrl.isEmpty) {
+                                      FFAppState().createLogo =
+                                          _model.uploadedFileUrl;
+                                      safeSetState(() {});
                                       return;
                                     }
                                     logFirebaseEvent('Button_auth');
@@ -1427,7 +1324,7 @@ class _CreateStoreWidgetState extends State<CreateStoreWidget> {
                                               ParamType.int,
                                             ),
                                             'logo': serializeParam(
-                                              _model.uploadedFileUrl2,
+                                              FFAppState().createLogo,
                                               ParamType.String,
                                             ),
                                             'address': serializeParam(

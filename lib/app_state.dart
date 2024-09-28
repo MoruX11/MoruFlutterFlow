@@ -160,4 +160,10 @@ class FFAppState extends ChangeNotifier {
   void insertAtIndexInPhotoToEditLogo(int index, String value) {
     photoToEditLogo.insert(index, value);
   }
+
+  String _createLogo = '';
+  String get createLogo => _createLogo;
+  set createLogo(String value) {
+    _createLogo = value;
+  }
 }

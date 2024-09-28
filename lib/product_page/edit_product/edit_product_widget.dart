@@ -14,6 +14,7 @@ import '/info/whatisgender/whatisgender_widget.dart';
 import '/product_page/administrar_hallway/create_hallway/create_hallway_widget.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart'
     as smooth_page_indicator;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -405,6 +406,8 @@ class _EditProductWidgetState extends State<EditProductWidget> {
                                                                                                         },
                                                                                                       ),
                                                                                                     });
+                                                                                                    logFirebaseEvent('Icon_delete_data');
+                                                                                                    await FirebaseStorage.instance.refFromURL(imagesItem).delete();
                                                                                                   },
                                                                                                   child: const Icon(
                                                                                                     Icons.close,

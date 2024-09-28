@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -1598,7 +1599,7 @@ class _UpdateDataWidgetState extends State<UpdateDataWidget>
                                                                       MediaSource
                                                                           .photoGallery,
                                                                   multiImage:
-                                                                      true,
+                                                                      false,
                                                                 );
                                                                 if (selectedMedia !=
                                                                         null &&
@@ -1663,10 +1664,12 @@ class _UpdateDataWidgetState extends State<UpdateDataWidget>
                                                                               .length) {
                                                                     safeSetState(
                                                                         () {
-                                                                      _model.uploadedLocalFiles =
-                                                                          selectedUploadedFiles;
-                                                                      _model.uploadedFileUrls =
-                                                                          downloadUrls;
+                                                                      _model.uploadedLocalFile =
+                                                                          selectedUploadedFiles
+                                                                              .first;
+                                                                      _model.uploadedFileUrl =
+                                                                          downloadUrls
+                                                                              .first;
                                                                     });
                                                                     showUploadMessage(
                                                                         context,
@@ -1682,14 +1685,48 @@ class _UpdateDataWidgetState extends State<UpdateDataWidget>
                                                                 }
 
                                                                 logFirebaseEvent(
+                                                                    'Button_backend_call');
+
+                                                                await widget
+                                                                    .dataStore!
+                                                                    .update({
+                                                                  ...mapToFirestore(
+                                                                    {
+                                                                      'logo': FieldValue
+                                                                          .delete(),
+                                                                    },
+                                                                  ),
+                                                                });
+                                                                logFirebaseEvent(
+                                                                    'Button_delete_data');
+                                                                await FirebaseStorage
+                                                                    .instance
+                                                                    .refFromURL(
+                                                                        updateDataStoresRecord!
+                                                                            .logo)
+                                                                    .delete();
+                                                                logFirebaseEvent(
+                                                                    'Button_backend_call');
+
+                                                                await widget
+                                                                    .dataStore!
+                                                                    .update(
+                                                                        createStoresRecordData(
+                                                                  logo: _model
+                                                                      .uploadedFileUrl,
+                                                                ));
+                                                                logFirebaseEvent(
                                                                     'Button_update_app_state');
                                                                 FFAppState()
-                                                                        .photosToEditProduct =
-                                                                    _model
-                                                                        .uploadedFileUrls
-                                                                        .toList()
-                                                                        .cast<
-                                                                            String>();
+                                                                    .photosToEditProduct = [];
+                                                                safeSetState(
+                                                                    () {});
+                                                                logFirebaseEvent(
+                                                                    'Button_update_app_state');
+                                                                FFAppState()
+                                                                    .addToPhotoToEditLogo(
+                                                                        _model
+                                                                            .uploadedFileUrl);
                                                                 safeSetState(
                                                                     () {});
                                                               },

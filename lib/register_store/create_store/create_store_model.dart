@@ -88,14 +88,10 @@ class CreateStoreModel extends FlutterFlowModel<CreateStoreWidget> {
   // State field(s) for Category widget.
   String? categoryValue;
   FormFieldController<String>? categoryValueController;
-  bool isDataUploading1 = false;
-  FFUploadedFile uploadedLocalFile1 =
+  bool isDataUploading = false;
+  FFUploadedFile uploadedLocalFile =
       FFUploadedFile(bytes: Uint8List.fromList([]));
-
-  bool isDataUploading2 = false;
-  FFUploadedFile uploadedLocalFile2 =
-      FFUploadedFile(bytes: Uint8List.fromList([]));
-  String uploadedFileUrl2 = '';
+  String uploadedFileUrl = '';
 
   @override
   void initState(BuildContext context) {

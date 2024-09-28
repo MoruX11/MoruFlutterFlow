@@ -226,6 +226,7 @@ class _VerificarNumeroPersonWidgetState
                         document: widget.document,
                         phoneNumber: widget.phoneNumber?.toString(),
                         displayName: widget.name,
+                        photoUrl: currentUserPhoto,
                       ));
                       logFirebaseEvent('Button_navigate_to');
 

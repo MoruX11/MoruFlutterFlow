@@ -86,3 +86,19 @@ List<ProductsRecord>? filterProducts(
   filteredProducts.shuffle();
   return filteredProducts;
 }
+
+String? deleteProducts(List<ProductsRecord>? products) {
+  // Quiero que recibas una lista de products y la elimines de firebase
+  if (products == null || products.isEmpty) {
+    return 'No products to delete';
+  }
+
+  try {
+    for (var product in products) {
+      product.reference.delete();
+    }
+    return null; // Return null if deletion is successful
+  } catch (e) {
+    return 'Error deleting products: $e';
+  }
+}

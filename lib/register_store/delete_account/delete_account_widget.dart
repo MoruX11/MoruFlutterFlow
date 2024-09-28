@@ -1,9 +1,11 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/custom_code/actions/index.dart' as actions;
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'delete_account_model.dart';
 export 'delete_account_model.dart';
@@ -88,71 +90,65 @@ class _DeleteAccountWidgetState extends State<DeleteAccountWidget> {
                   ),
                 ),
               ),
-              StreamBuilder<List<PersonsRecord>>(
-                stream: queryPersonsRecord(
-                  singleRecord: true,
-                ),
-                builder: (context, snapshot) {
-                  // Customize what your widget looks like when it's loading.
-                  if (!snapshot.hasData) {
-                    return const Center(
-                      child: SizedBox(
-                        width: 24.0,
-                        height: 24.0,
-                        child: SpinKitWave(
-                          color: Color(0xFF9B70E6),
-                          size: 24.0,
-                        ),
-                      ),
-                    );
-                  }
-                  List<PersonsRecord> eliminarPersonsRecordList =
-                      snapshot.data!;
-                  // Return an empty Container when the item does not exist.
-                  if (snapshot.data!.isEmpty) {
-                    return Container();
-                  }
-                  final eliminarPersonsRecord =
-                      eliminarPersonsRecordList.isNotEmpty
-                          ? eliminarPersonsRecordList.first
-                          : null;
-
-                  return FFButtonWidget(
-                    onPressed: () async {
-                      logFirebaseEvent('DELETE_ACCOUNT_COMP_Eliminar_ON_TAP');
-                      logFirebaseEvent('Eliminar_backend_call');
-                      await eliminarPersonsRecord!.reference.delete();
-                      logFirebaseEvent('Eliminar_navigate_to');
-
-                      context.pushNamed('HomePage');
-                    },
-                    text: 'Eliminar',
-                    options: FFButtonOptions(
-                      height: 40.0,
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 0.0),
-                      iconPadding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: FlutterFlowTheme.of(context).primary,
-                      textStyle: FlutterFlowTheme.of(context)
-                          .titleSmall
-                          .override(
-                            fontFamily:
-                                FlutterFlowTheme.of(context).titleSmallFamily,
-                            color: Colors.white,
-                            letterSpacing: 0.0,
-                            useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                FlutterFlowTheme.of(context).titleSmallFamily),
-                          ),
-                      elevation: 3.0,
-                      borderSide: const BorderSide(
-                        color: Colors.transparent,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
+              FFButtonWidget(
+                onPressed: () async {
+                  logFirebaseEvent('DELETE_ACCOUNT_COMP_Eliminar_ON_TAP');
+                  logFirebaseEvent('Eliminar_firestore_query');
+                  _model.productsToDelete = await queryProductsRecordOnce(
+                    queryBuilder: (productsRecord) => productsRecord.where(
+                      'store',
+                      isEqualTo: currentUserDocument?.store,
                     ),
                   );
+                  logFirebaseEvent('Eliminar_custom_action');
+                  await actions.deleteProductsAction(
+                    _model.productsToDelete?.toList(),
+                  );
+                  logFirebaseEvent('Eliminar_firestore_query');
+                  _model.hallwayToDelete = await queryHallwayRecordOnce(
+                    queryBuilder: (hallwayRecord) => hallwayRecord.where(
+                      'store',
+                      isEqualTo: currentUserDocument?.store,
+                    ),
+                    singleRecord: true,
+                  ).then((s) => s.firstOrNull);
+                  logFirebaseEvent('Eliminar_backend_call');
+                  await _model.hallwayToDelete!.reference.delete();
+                  logFirebaseEvent('Eliminar_backend_call');
+                  await currentUserDocument!.store!.delete();
+                  logFirebaseEvent('Eliminar_backend_call');
+                  await currentUserReference!.delete();
+                  logFirebaseEvent('Eliminar_auth');
+                  GoRouter.of(context).prepareAuthEvent();
+                  await authManager.signOut();
+                  GoRouter.of(context).clearRedirectLocation();
+
+                  context.goNamedAuth('HomePage', context.mounted);
+
+                  safeSetState(() {});
                 },
+                text: 'Eliminar',
+                options: FFButtonOptions(
+                  height: 40.0,
+                  padding: const EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 0.0),
+                  iconPadding:
+                      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                  color: FlutterFlowTheme.of(context).primary,
+                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                        fontFamily:
+                            FlutterFlowTheme.of(context).titleSmallFamily,
+                        color: Colors.white,
+                        letterSpacing: 0.0,
+                        useGoogleFonts: GoogleFonts.asMap().containsKey(
+                            FlutterFlowTheme.of(context).titleSmallFamily),
+                      ),
+                  elevation: 3.0,
+                  borderSide: const BorderSide(
+                    color: Colors.transparent,
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
             ],
           ),

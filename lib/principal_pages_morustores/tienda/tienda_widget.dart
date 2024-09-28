@@ -12,6 +12,7 @@ import '/product_page/menu_paginaproductos/menu_paginaproductos_widget.dart';
 import '/product_page/product_list/product_list_widget.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,6 +39,23 @@ class _TiendaWidgetState extends State<TiendaWidget> {
     _model = createModel(context, () => TiendaModel());
 
     logFirebaseEvent('screen_view', parameters: {'screen_name': 'Tienda'});
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      logFirebaseEvent('TIENDA_PAGE_Tienda_ON_INIT_STATE');
+      if (!(currentUserDocument?.store != null)) {
+        logFirebaseEvent('Tienda_navigate_to');
+
+        context.pushNamed(
+          'CreateStore',
+          queryParameters: {
+            'personid': serializeParam(
+              currentUserReference?.id,
+              ParamType.String,
+            ),
+          }.withoutNulls,
+        );
+      }
+    });
   }
 
   @override

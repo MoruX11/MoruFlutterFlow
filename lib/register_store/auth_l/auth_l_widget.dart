@@ -148,8 +148,7 @@ class _AuthLWidgetState extends State<AuthLWidget>
                                   ),
                                   singleRecord: true,
                                 ).then((s) => s.firstOrNull);
-                                if (_model.storeFounded?.owner ==
-                                    currentUserReference) {
+                                if (currentUserDocument?.store != null) {
                                   logFirebaseEvent('Button_navigate_to');
 
                                   context.pushNamedAuth(
@@ -162,7 +161,15 @@ class _AuthLWidgetState extends State<AuthLWidget>
                                   logFirebaseEvent('Button_navigate_to');
 
                                   context.pushNamedAuth(
-                                      'CreateStore', context.mounted);
+                                    'CreateStore',
+                                    context.mounted,
+                                    queryParameters: {
+                                      'personid': serializeParam(
+                                        currentUserReference?.id,
+                                        ParamType.String,
+                                      ),
+                                    }.withoutNulls,
+                                  );
                                 }
                               }
 
